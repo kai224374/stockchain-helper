@@ -7,7 +7,7 @@ export const config: PlasmoCSConfig = {
 }
 
 // 可替換為你自己的 GitHub Raw JSON 連結或伺服器 API 網址
-const REMOTE_DATA_URL = "https://raw.githubusercontent.com/your-username/stockchain-db/main/stocks.json"
+const REMOTE_DATA_URL = "https://raw.githubusercontent.com/kai224374/stockchain-helper/main/src/data/stocks.json"
 
 export default function StockChainOverlay() {
   const [stockDb, setStockDb] = useState<any>(localStockData) // 預設使用本地舊資料
