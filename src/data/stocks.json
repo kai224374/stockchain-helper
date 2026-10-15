@@ -1,0 +1,82 @@
+{
+  "3131": {
+    "symbol": "3131",
+    "name": "弘塑",
+    "sector": "半導體設備 / CoWoS",
+    "description": "半導體濕製程設備大廠，主攻先進封裝與清洗設備",
+    "upstream": [
+      {
+        "name": "Veeco",
+        "note": "光學/載台模組"
+      }
+    ],
+    "downstream": [
+      {
+        "name": "台積電",
+        "note": "CoWoS 晶圓代工"
+      },
+      {
+        "name": "日月光投控",
+        "note": "先進封裝測試"
+      }
+    ],
+    "relatedETFs": [
+      "009816 凱基台灣TOP50",
+      "00713 元大高股息低波動",
+      "安聯台灣科技基金"
+    ]
+  },
+  "2330": {
+    "symbol": "2330",
+    "name": "台積電",
+    "sector": "晶圓代工",
+    "description": "全球先進製程與晶圓代工龍頭",
+    "upstream": [
+      {
+        "name": "ASML",
+        "note": "EUV 光刻機"
+      },
+      {
+        "name": "弘塑",
+        "note": "濕製程設備"
+      }
+    ],
+    "downstream": [
+      {
+        "name": "Apple",
+        "note": "A/M 晶片"
+      },
+      {
+        "name": "NVIDIA",
+        "note": "AI GPU 晶片"
+      }
+    ],
+    "relatedETFs": [
+      "0050 富邦台50",
+      "009816 凱基台灣TOP50",
+      "0056 元大高股息"
+    ]
+  },
+  "SMCI": {
+    "symbol": "SMCI",
+    "name": "美超微",
+    "sector": "AI 伺服器 / 液冷系統",
+    "description": "高效能伺服器與模組化機櫃解決方案商",
+    "upstream": [
+      {
+        "name": "NVIDIA",
+        "note": "GPU 晶片"
+      }
+    ],
+    "downstream": [
+      {
+        "name": "CSP 雲端服務商",
+        "note": "資料中心建置"
+      }
+    ],
+    "relatedETFs": [
+      "SMH 半導體 ETF",
+      "009805 台新美國電力基建"
+    ]
+  }
+}
