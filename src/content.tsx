@@ -6,8 +6,9 @@ export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"]
 }
 
-// 可替換為你自己的 GitHub Raw JSON 連結或伺服器 API 網址
-const REMOTE_DATA_URL = "https://raw.githubusercontent.com/kai224374/stockchain-helper/main/src/data/stocks.json"
+// 遠端動態資料庫連結
+const REMOTE_DATA_URL =
+  "https://raw.githubusercontent.com/kai224374/stockchain-helper/main/src/data/stocks.json"
 
 export default function StockChainOverlay() {
   const [stockDb, setStockDb] = useState<any>(localStockData) // 預設使用本地舊資料
@@ -35,19 +36,34 @@ export default function StockChainOverlay() {
   }, [])
 
   // 根據名稱或代號尋找股票資料
+// 根據名稱或代號尋找股票資料
   const findStock = (term: string) => {
     if (!term) return null
-    const cleanTerm = term.trim().toLowerCase()
+    
+    // 清理搜尋文字：轉小寫，並去掉 common 公司字尾
+    const cleanTerm = term
+      .trim()
+      .toLowerCase()
+      .replace(/(股份有限公司|普通股|–KY|-KY|KY)/g, "")
 
     const matchedKey = Object.keys(stockDb).find((key) => {
       const item = (stockDb as any)[key]
-      return (
-        key.toLowerCase() === cleanTerm ||
-        item.symbol.toLowerCase() === cleanTerm ||
-        item.name.toLowerCase() === cleanTerm ||
-        cleanTerm.includes(item.name.toLowerCase()) ||
-        item.name.toLowerCase().includes(cleanTerm)
-      )
+      if (!item) return false
+
+      const symbol = item.symbol ? item.symbol.toLowerCase() : ""
+      const name = item.name ? item.name.toLowerCase() : ""
+
+      // 完全匹配代碼或簡稱
+      if (key.toLowerCase() === cleanTerm || symbol === cleanTerm || name === cleanTerm) {
+        return true
+      }
+
+      // 雙向包含：選取「迅得機械」能匹配「迅得」，選取「迅得」也能匹配「迅得」
+      if (name && (cleanTerm.includes(name) || name.includes(cleanTerm))) {
+        return true
+      }
+
+      return false
     })
 
     return matchedKey ? (stockDb as any)[matchedKey] : null
@@ -134,6 +150,7 @@ export default function StockChainOverlay() {
         color: "#1e293b",
         zIndex: 999999
       }}>
+      {/* 頂部標題列 */}
       <div
         style={{
           display: "flex",
@@ -162,67 +179,81 @@ export default function StockChainOverlay() {
             {selectedStock.name} ({selectedStock.symbol})
           </span>
         </div>
-        <span
-          style={{
-            fontSize: "11px",
-            backgroundColor: "#eff6ff",
-            color: "#2563eb",
-            padding: "2px 6px",
-            borderRadius: "4px"
-          }}>
-          {selectedStock.sector}
-        </span>
+        {selectedStock.sector && (
+          <span
+            style={{
+              fontSize: "11px",
+              backgroundColor: "#eff6ff",
+              color: "#2563eb",
+              padding: "2px 6px",
+              borderRadius: "4px"
+            }}>
+            {selectedStock.sector}
+          </span>
+        )}
       </div>
 
-      <p style={{ fontSize: "12px", color: "#64748b", margin: "6px 0 10px 0" }}>
-        {selectedStock.description}
-      </p>
+      {/* 公司簡介 */}
+      {selectedStock.description && (
+        <p style={{ fontSize: "12px", color: "#64748b", margin: "6px 0 10px 0", lineHeight: "1.4" }}>
+          {selectedStock.description}
+        </p>
+      )}
 
       <hr style={{ border: "none", borderTop: "1px solid #f1f5f9", margin: "8px 0" }} />
 
+      {/* 上下游關聯 */}
       <div style={{ fontSize: "12px" }}>
         <div style={{ fontWeight: "bold", color: "#334155", marginBottom: "6px" }}>
           🔗 上下游關聯：
         </div>
 
-        {selectedStock.downstream && (
+        {/* 核心客戶 (下游) */}
+        {selectedStock.downstream && selectedStock.downstream.length > 0 && (
           <div style={{ margin: "4px 0", color: "#475569" }}>
             <span style={{ fontWeight: "600" }}>• 核心客戶：</span>
             {selectedStock.downstream.map((d: any, i: number) => {
-              const isAvailable = !!findStock(d.name)
+              const itemName = typeof d === "object" ? d.name : d
+              const itemNote = typeof d === "object" && d.note ? ` (${d.note})` : ""
+              const isAvailable = !!findStock(itemName)
+
               return (
                 <span
                   key={i}
-                  onClick={() => handleStockClick(d.name)}
+                  onClick={() => handleStockClick(itemName)}
                   style={{
                     color: isAvailable ? "#2563eb" : "#475569",
                     textDecoration: isAvailable ? "underline" : "none",
                     cursor: isAvailable ? "pointer" : "default",
                     fontWeight: isAvailable ? "bold" : "normal"
                   }}>
-                  {d.name} ({d.note}){i < selectedStock.downstream.length - 1 ? "、" : ""}
+                  {itemName}{itemNote}{i < selectedStock.downstream.length - 1 ? "、" : ""}
                 </span>
               )
             })}
           </div>
         )}
 
-        {selectedStock.upstream && (
+        {/* 關鍵供應商 (上游) */}
+        {selectedStock.upstream && selectedStock.upstream.length > 0 && (
           <div style={{ margin: "4px 0", color: "#475569" }}>
             <span style={{ fontWeight: "600" }}>• 關鍵供應商：</span>
             {selectedStock.upstream.map((u: any, i: number) => {
-              const isAvailable = !!findStock(u.name)
+              const itemName = typeof u === "object" ? u.name : u
+              const itemNote = typeof u === "object" && u.note ? ` (${u.note})` : ""
+              const isAvailable = !!findStock(itemName)
+
               return (
                 <span
                   key={i}
-                  onClick={() => handleStockClick(u.name)}
+                  onClick={() => handleStockClick(itemName)}
                   style={{
                     color: isAvailable ? "#2563eb" : "#475569",
                     textDecoration: isAvailable ? "underline" : "none",
                     cursor: isAvailable ? "pointer" : "default",
                     fontWeight: isAvailable ? "bold" : "normal"
                   }}>
-                  {u.name} ({u.note}){i < selectedStock.upstream.length - 1 ? "、" : ""}
+                  {itemName}{itemNote}{i < selectedStock.upstream.length - 1 ? "、" : ""}
                 </span>
               )
             })}
@@ -230,7 +261,8 @@ export default function StockChainOverlay() {
         )}
       </div>
 
-      {selectedStock.relatedETFs && (
+      {/* 納入重點 ETF */}
+      {selectedStock.relatedETFs && selectedStock.relatedETFs.length > 0 && (
         <div style={{ fontSize: "12px", marginTop: "10px" }}>
           <div style={{ fontWeight: "bold", color: "#334155", marginBottom: "4px" }}>
             📊 納入重點 ETF：
